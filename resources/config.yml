@@ -1,0 +1,7 @@
+discord:
+	token: token
+	channel_id: 1431176448437260448
+
+minecraft:
+	log_path: /opt/mcserver/logs/latest.log
+	tmux_session: minecraft
