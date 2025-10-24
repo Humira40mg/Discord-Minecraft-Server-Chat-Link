@@ -46,7 +46,14 @@ async def send_to_minecraft(message):
 
 @client.event
 async def on_ready():
-    print(f"Connecté comme {client.user}")
+    print("""
+        _                            __ _       ___ _                            _  
+  /\/\ (_)_ __   ___  ___ _ __ __ _ / _| |_    / __\ |__   __ _ _ __  _ __   ___| | 
+ /    \| | '_ \ / _ \/ __| '__/ _` | |_| __|  / /  | '_ \ / _` | '_ \| '_ \ / _ \ | 
+/ /\/\ \ | | | |  __/ (__| | | (_| |  _| |_  / /___| | | | (_| | | | | | | |  __/ | 
+\/    \/_|_| |_|\___|\___|_|  \__,_|_|  \__| \____/|_| |_|\__,_|_| |_|_| |_|\___|_|                                                                                                                                                       
+    """)
+    print(f"Connected as {client.user}")
     channel = client.get_channel(CHANNEL_ID)
     event_handler = LogHandler(channel)
     observer = Observer()
@@ -58,6 +65,7 @@ async def on_message(message):
     if message.author == client.user:
         return
     if message.channel.id == CHANNEL_ID:
+        print(message.content)
         await send_to_minecraft(f"[{message.author.name}] {message.content}")
 
 client.run(TOKEN)
