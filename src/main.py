@@ -13,6 +13,7 @@ MINECRAFT_LOG = config["minecraft"]["log_path"]
 
 intents = discord.Intents.default()
 intents.messages = True
+intents.message_content = True
 client = discord.Client(intents=intents)
 
 # --- Link Minecraft -> Discord ---
@@ -41,7 +42,7 @@ class LogHandler(FileSystemEventHandler):
 # --- Link Discord -> Minecraft ---
 async def send_to_minecraft(message):
 	# Uses the tmux session referenced in the config file
-    command = f'tmux send-keys -t {config["minecraft"]["tmux_session"]} "say \'{message}\'" ENTER'
+    command = f'tmux send-keys -t {config["minecraft"]["tmux_session"]} "say {message}" ENTER'
     subprocess.run(command, shell=True)
 
 @client.event
@@ -65,7 +66,6 @@ async def on_message(message):
     if message.author == client.user:
         return
     if message.channel.id == CHANNEL_ID:
-        print(message.content)
         await send_to_minecraft(f"[{message.author.name}] {message.content}")
 
 client.run(TOKEN)
