@@ -34,14 +34,14 @@ class LogHandler(FileSystemEventHandler):
     async def send_to_discord(self, lines):
         for line in lines:
             if "<" in line and ">" in line:
-                msg = line.split(">:")[-1].strip()
+                msg = line.split("> ")[-1].strip()
                 pseudo = line.split("<")[1].split(">")[0]
                 await self.channel.send(f"**{pseudo}** : {msg}")
 
 # --- Link Discord -> Minecraft ---
 async def send_to_minecraft(message):
 	# Uses the tmux session referenced in the config file
-    command = f'tmux send-keys -t {config["minecraft"]["tmux_session"]} "say {message}" ENTER'
+    command = f'tmux send-keys -t {config["minecraft"]["tmux_session"]} "say \'{message}\'" ENTER'
     subprocess.run(command, shell=True)
 
 @client.event
@@ -58,6 +58,6 @@ async def on_message(message):
     if message.author == client.user:
         return
     if message.channel.id == CHANNEL_ID:
-        await send_to_minecraft(f"<{message.author.name}> {message.content}")
+        await send_to_minecraft(f"[{message.author.name}] {message.content}")
 
 client.run(TOKEN)
