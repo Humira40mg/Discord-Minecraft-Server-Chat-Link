@@ -66,6 +66,6 @@ async def on_message(message):
     if message.author == client.user:
         return
     if message.channel.id == CHANNEL_ID:
-        await send_to_minecraft(f"[{message.author.name}] {message.content}")
+        await send_to_minecraft(f"[{message.author.name}] {message.content.replace('<', '[').replace('>', ']')}")
 
 client.run(TOKEN)
