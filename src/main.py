@@ -6,6 +6,7 @@ import os
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from config import config
+from time import sleep
 
 TOKEN = config["discord"]["token"]
 CHANNEL_ID = config["discord"]["channel_id"]
@@ -45,6 +46,13 @@ async def send_to_minecraft(message):
     command = f'tmux send-keys -t {config["minecraft"]["tmux_session"]} "say {message}" ENTER'
     subprocess.run(command, shell=True)
 
+
+def restart_observer():
+    observer = Observer()
+    observer.schedule(event_handler, path=os.path.dirname(MINECRAFT_LOG), recursive=False)
+    observer.start()
+    return observer
+
 @client.event
 async def on_ready():
     print("""
@@ -57,9 +65,15 @@ async def on_ready():
     print(f"Connected as {client.user}")
     channel = client.get_channel(CHANNEL_ID)
     event_handler = LogHandler(channel)
-    observer = Observer()
-    observer.schedule(event_handler, path=os.path.dirname(MINECRAFT_LOG), recursive=False)
-    observer.start()
+    observer = restart_observer()
+    while True:
+        if not observer.is_alive():
+            print("Observer Thread died, restarting Observer.")
+            observer.stop()
+            observer.join()
+            observer = restart_observer()
+        sleep(14)
+        
 
 @client.event
 async def on_message(message):
