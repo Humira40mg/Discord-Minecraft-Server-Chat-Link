@@ -7,6 +7,7 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from config import config
 from time import sleep
+import threading
 
 TOKEN = config["discord"]["token"]
 CHANNEL_ID = config["discord"]["channel_id"]
@@ -48,10 +49,22 @@ async def send_to_minecraft(message):
 
 
 def restart_observer():
+    channel = client.get_channel(CHANNEL_ID)
+    event_handler = LogHandler(channel)
     observer = Observer()
     observer.schedule(event_handler, path=os.path.dirname(MINECRAFT_LOG), recursive=False)
     observer.start()
     return observer
+
+def monitor_observer_thread():
+    observer = restart_observer()
+    while True:
+        if not observer.is_alive():
+            print("Observer Thread died, restarting Observer.")
+            observer.stop()
+            observer.join()
+            observer = restart_observer()
+        sleep(14)
 
 @client.event
 async def on_ready():
@@ -63,16 +76,7 @@ async def on_ready():
 \/    \/_|_| |_|\___|\___|_|  \__,_|_|  \__| \____/|_| |_|\__,_|_| |_|_| |_|\___|_|                                                                                                                                                       
     """)
     print(f"Connected as {client.user}")
-    channel = client.get_channel(CHANNEL_ID)
-    event_handler = LogHandler(channel)
-    observer = restart_observer()
-    while True:
-        if not observer.is_alive():
-            print("Observer Thread died, restarting Observer.")
-            observer.stop()
-            observer.join()
-            observer = restart_observer()
-        sleep(14)
+    threading.Thread(target=monitor_observer_thread, daemon=True).start()
         
 
 @client.event
